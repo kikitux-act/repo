@@ -16,18 +16,29 @@ ELSE
 $source = "http://download.piriform.com/ccsetup535.exe"
 $destination = "$workdir\ccsetup.exe"
 
+$FileExist = $True
+If ((Test-Path $destination) -eq $False) {
+    $FileExist = $False
+} 
+
 # Check if Invoke-Webrequest exists otherwise execute WebClient
 
 if (Get-Command 'Invoke-Webrequest')
 {
-     Invoke-WebRequest $source -OutFile $destination
+     if ($FileExist -eq $False) {
+        Invoke-WebRequest $source -OutFile $destination
+     }
 }
 else
 {
-    $WebClient = New-Object System.Net.WebClient
-    $webclient.DownloadFile($source, $destination)
+    if ($FileExist -eq $False) {
+      $WebClient = New-Object System.Net.WebClient
+      $webclient.DownloadFile($source, $destination)
+    }
 }
 
+# $SourceFile = "\\server\software\ccsetup.exe"
+# Copy-Item -Path $SourceFile -Destination $Destination -Force
 
 # Start the installation
 Start-Process -FilePath "$workdir\ccsetup.exe" -ArgumentList "/S"
@@ -36,7 +47,7 @@ Start-Process -FilePath "$workdir\ccsetup.exe" -ArgumentList "/S"
 Start-Sleep -s 35
 
 # Remove the installer
-rm -Force $workdir\c*
+rm -Force $destination
 
 ## For Windows 7 please change 
 
