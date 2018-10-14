@@ -8,6 +8,11 @@ $pwfile = "C:\scripts\ps\$env:USERNAME-passwd.key"
 # Connect to Actifio appliance  #
 #################################
 
+$moduleins = get-module -listavailable -name ActPowerCLI
+if ($moduleins -eq $null) {
+    Import-Module ActPowerCLI
+}
+
 ##  Save-ActPassword –filename "C:\scripts\password.key"
 "password" | ConvertTo-SecureString –AsPlainText –Force | ConvertFrom-SecureString | Out-File $pwfile
 
