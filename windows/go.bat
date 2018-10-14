@@ -1,0 +1,18 @@
+@ECHO OFF
+setlocal
+
+IF [%1]==[] GOTO SYNTAX
+
+SET POWERSHELL="C:\WINDOWS\system32\WindowsPowerShell\v1.0\powershell.exe"
+SET PS_SCRIPT="c:\scripts\PS\%~n1.ps1"
+
+%POWERSHELL% -NoProfile -ExecutionPolicy Bypass -File %PS_SCRIPT% 
+GOTO DONE
+
+:SYNTAX
+@ECHO. 
+@ECHO USAGE: %~n0 PSFILENAME
+@ECHO.
+@ECHO MISSING PARAMETER!! PLEASE SPECIFY THE POWERSHELL SCRIPT NAME (PSFILENAME)
+
+:DONE
