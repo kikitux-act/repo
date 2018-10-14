@@ -35,6 +35,7 @@ if (Get-Command 'Invoke-Webrequest') {
 
 # Kick off the installation of the Actifio connector
 Start-Process -FilePath $destination 
+# Start-Process -Wait $env:TEMP\git.exe -ArgumentList /silent
 
 # Wait XX Seconds for the installation to finish
 Start-Sleep -s 35
