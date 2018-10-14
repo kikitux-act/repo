@@ -15,3 +15,7 @@ New-Item -ItemType Directory -Force -Path $targetdir | out-null
 }
 
 copy-item $sourcedir\* $targetdir
+
+# $workdir = $env:TEMP 
+# Copy-Item -Path "\\10.61.5.162\public\winsoftware\putty-0.65-installer.exe" -Destination "C:\Temp" -Force -Recurse 
+# Copy-Item -Source \\server\share\file -Destination C:\path\ 
