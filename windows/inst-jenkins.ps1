@@ -36,7 +36,8 @@ Expand-ZIPFile –File $destination –Destination $workdir
 Start-Process -Wait -FilePath $workdir\jenkins.msi
 
 # Wait XX Seconds for the installation to finish
-Start-Sleep -s 35
+Start-Sleep -s 15
 
 # Remove the installer directory
+Remove-Item $workdir\jenkins.msi -Force
 Remove-Item $destination -Force
