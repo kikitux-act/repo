@@ -15,6 +15,13 @@ echo List of plugins installed in Jenkins
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 list-plugins --username %uid% --password %pwd% 
 
 echo .
+echo Deleting existing job
+%java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 delete-job "OnDemand-DB" --username %uid% --password %pwd% 
+%java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 delete-job "Refresh-Workflow-DB" --username %uid% --password %pwd% 
+%java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 delete-job "Cleanup-DB" --username %uid% --password %pwd% 
+%java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 delete-job "AGM-ListHost" --username %uid% --password %pwd% 
+
+echo .
 echo Import jobs
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 create-job "OnDemand-DB" --username %uid% --password %pwd% < OnDemand-DB.xml
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 create-job "Refresh-Workflow-DB" --username %uid% --password %pwd% < Refresh-Workflow-DB.xml
