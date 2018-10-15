@@ -19,6 +19,7 @@ echo Import jobs
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 create-job "OnDemand-DB" --username %uid% --password %pwd% < OnDemand-DB.xml
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 create-job "Refresh-Workflow-DB" --username %uid% --password %pwd% < Refresh-Workflow-DB.xml
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 create-job "Cleanup-DB" --username %uid% --password %pwd% < Cleanup-DB.xml
+%java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 create-job "AGM-ListHost" --username %uid% --password %pwd% < List-Host-REST.xml
 
 echo .
 echo Copying supporting scripts to c:\scripts
