@@ -33,6 +33,22 @@ Write-Host "Renaming folder" -ForegroundColor Cyan
 Move-Item -Path ($targetondisk+"\ActPowerCLI-7.0.0.6\ActPowerCLI") -Destination $targetondisk -Force
 Remove-Item -Path ($targetondisk+"\ActPowerCLI-7.0.0.6") 
 
+
+$targetondisk = "$($env:SystemRoot)\SysWOW64\WindowsPowerShell\v1.0\Modules"
+#
+# Copies the module to the appropriate directory and cleanup the folders
+#
+$shell_app=new-object -com shell.application
+$zip_file = $shell_app.namespace($file)
+Write-Host "Uncompressing the Zip file to $($targetondisk)" -ForegroundColor Cyan
+$destination = $shell_app.namespace($targetondisk)
+$destination.Copyhere($zip_file.items(), 0x10)
+
+Write-Host "Renaming folder" -ForegroundColor Cyan
+Move-Item -Path ($targetondisk+"\ActPowerCLI-7.0.0.6\ActPowerCLI") -Destination $targetondisk -Force
+Remove-Item -Path ($targetondisk+"\ActPowerCLI-7.0.0.6") 
+
+
 # 
 # Install the ActPowerCLI module
 #
