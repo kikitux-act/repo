@@ -3,6 +3,7 @@
 ```
 cd /d c:\clone
 "C:\Program Files (x86)\Git\bin\git.exe" clone https://github.com/mikechew/repo.git
+"C:\Program Files\Git\bin\git.exe" clone https://github.com/mikechew/repo.git
 ```
 
 ```
