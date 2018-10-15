@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?><project>
+  <actions/>
+  <description/>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>Host</name>
+          <description/>
+          <randomName>choice-parameter-1763641831376124</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.41">
+              <script>import groovy.json.JsonSlurper
+
+def cdsip = '172.24.1.180'
+def cdsuser = 'mchew'
+def cdspass = '12!pass345'
+def cdskey = 'MichaelChew'
+
+def cmdstr = "c:\\curl\\bin\\curl -s -k https://${cdsip}/actifio/api/login?name=${cdsuser}&amp;password=${cdspass}&amp;vendorkey=${cdskey}"
+println "command = " + cmdstr
+
+def proc = cmdstr.execute();
+def outputStream = new StringBuffer();
+proc.waitForProcessOutput(outputStream, System.err);
+println(outputStream.toString());
+def json = new JsonSlurper().parseText( outputStream.toString() )
+
+println json.sessionid
+
+def sessionid = json.sessionid
+
+def cmdstr2 = "c:\\curl\\bin\\curl -s -k -XGET https://${cdsip}/actifio/api/info/lshost?sessionid=${sessionid}"
+println "command2 = " + cmdstr2
+
+def proc2 = cmdstr2.execute();
+def outputStream2 = new StringBuffer();
+proc2.waitForProcessOutput(outputStream2, System.err);
+println(outputStream2.toString());
+def json2 = new JsonSlurper().parseText( outputStream2.toString() )
+
+List&lt;String&gt; artifacts = new ArrayList&lt;String&gt;()
+
+def item = json2.result
+def ip0 = item.ipaddress[0]
+item.each { f-&gt;
+  def str2 = f.get("ipaddress");
+  def str3 = f.get("hostname");
+//  def str4 = "${str2}  ${str3}"
+  def str4 = String.format("  %s  %s", str2.padRight(15, '_'), str3 );
+  
+  artifacts.add(str4)
+  if (str2 == "") { println "&gt;&gt;  ${str2} - " }
+  println "str2 = ${str2} // ${f.ipaddress}  - ${f.hostname} "
+}
+println item.ipaddress[0]
+println artifacts
+return artifacts</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.41">
+              <script/>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>List-Host-REST</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.BatchFile>
+      <command>@echo off&#13;
+echo Completed&#13;
+::&#13;
+echo Selected host is %Host%</command>
+    </hudson.tasks.BatchFile>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

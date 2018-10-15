@@ -1,0 +1,243 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>DBtypeList</name>
+          <description>Database type</description>
+          <randomName>choice-parameter-1194337333164700</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>def dbtypes = []
+def powerShellCommand = &apos;c:\\scripts\\list_dbtype.ps1 &apos;
+def shellCommand = &quot;powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -Command \&quot;${powerShellCommand}\&quot;&quot;
+
+def process = shellCommand.execute()
+process.waitFor()
+def outputStream = new StringBuffer();
+process.waitForProcessOutput(outputStream, System.err)
+if(process.exitValue()){
+println process.err.text
+} else {
+println outputStream
+dbtypes = outputStream.tokenize(&quot;|&quot;)
+}
+return dbtypes</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Workflow-DB</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.1">
+          <name>DBAppNameList</name>
+          <description>List of databases</description>
+          <randomName>choice-parameter-1199680190336100</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>def dbApps = []
+def powerShellCommand = &apos;c:\\scripts\\list_dbappname.ps1 -srchapptype &apos; + DBtypeList
+
+def shellCommand = &quot;powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -Command \&quot;${powerShellCommand}\&quot;&quot;
+
+def process = shellCommand.execute()
+process.waitFor()
+def outputStream = new StringBuffer();
+process.waitForProcessOutput(outputStream, System.err)
+if(process.exitValue()){
+println process.err.text
+} else {
+println outputStream
+dbApps = outputStream.tokenize(&quot;|&quot;)
+}
+return dbApps</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Workflow-DB</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>DBtypeList</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.1">
+          <name>WorkflowList</name>
+          <description>List of workflows associated with the above database</description>
+          <randomName>choice-parameter-1200091683665000</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>def wFlows = []
+def powerShellCommand = &apos;c:\\scripts\\list_workflows.ps1 -srchapptype &apos; + DBtypeList + &apos; -srchappname &apos; + DBAppNameList
+
+def shellCommand = &quot;powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -Command \&quot;${powerShellCommand}\&quot;&quot;
+
+def process = shellCommand.execute()
+process.waitFor()
+def outputStream = new StringBuffer();
+process.waitForProcessOutput(outputStream, System.err)
+if(process.exitValue()){
+println process.err.text
+} else {
+println outputStream
+wFlows = outputStream.tokenize(&quot;|&quot;)
+}
+return wFlows</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Workflow-DB</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>DBtypeList ,DBAppNameList</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>ActifioIP</name>
+          <description>IP address of the Actifio appliance</description>
+          <defaultValue>172.24.1.180</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ActUser</name>
+          <description>Actifio service account for the Jenkins job</description>
+          <defaultValue>jenkin01</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.PasswordParameterDefinition>
+          <name>ActPassword</name>
+          <description>Password for the Actifio service account</description>
+          <defaultValue>{AQAAABAAAAAQ7mVdMO2l/SfslPNTcuWb3B1EYNz8PokJKgPoBNkbNQs=}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>Message</name>
+          <description></description>
+          <randomName>choice-parameter-1565084655497300</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>line1=&apos;To kick off the refresh of &lt;b&gt;&apos; + DBAppNameList + &apos;&lt;/b&gt; &apos; + DBtypeList + &apos; database&apos;
+line2=&quot;using workflow &quot; + &apos;&lt;b&gt; &apos; + WorkflowList + &apos;&lt;/b&gt;&apos; + &apos; , click on the &lt;mark&gt; Build &lt;/mark&gt; button&apos;
+return &quot;&lt;p style=&apos;background-color:Olive;color:GhostWhite&apos;&gt;${line1}&lt;/br&gt;${line2}&lt;/br&gt;&lt;/p&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Workflow-DB</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>DBAppNameList, WorkflowList, DBtypeList</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@1.3">
+      <command>$pwfile = &quot;c:\scripts\jenkin01.key&quot;
+$env:IGNOREACTCERTS = $true
+ 
+$env:ActPassword| ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-File $pwfile
+ 
+if (! $env:ACTSESSIONID ){
+  Connect-Act -acthost $Env:ActifioIP -actuser $Env:ActUser -passwordfile $pwfile -ignorecerts -quiet
+}
+
+$workflow_name = $Env:WorkflowList -replace &quot;`n&quot;, &quot;&quot;
+$workflow_id = $(udsinfo lsworkflow | where-object {$_.name -eq $workflow_name}).id
+write-output &quot;Kicking off workflow $workflow_name ( ID: $workflow_id ) `n&quot;
+
+$rc = $(udstask chworkflow -disable false $workflow_id)    
+if ($rc.result -ne $workflow_id) { write-output &quot;There is a problem disabling the workflow $workflow_name - $rc.errormessage&quot; ; exit 1 }
+
+udstask runworkflow $workflow_id | out-null   
+$rc = $(reportworkflows -s | where-object { $_.ID -eq  $workflow_id })
+if ($rc.status -ne &quot;RUNNING&quot;) { write-output &quot;Unable to trigger workflow - $($rc.steps)&quot; ; exit 1}
+
+$rc = $(udstask chworkflow -disable true $workflow_id)    
+if ($rc.result -ne $workflow_id) { write-output &quot;There is a problem enabling with workflow $workflow_name - $rc.errormessage&quot; ; exit 1 }
+
+sleep -Seconds 30
+$srchost = $(reportworkflows | where {$_.WorkflowName -eq $workflow_name } ).SourceHostName
+$appname = $(reportworkflows | where {$_.WorkflowName -eq $workflow_name } ).SourceAppName
+$vdb = $(reportworkflows | where {$_.WorkflowName -eq $workflow_name } ).TargetApp
+$appid = $(reportworkflows | where {$_.WorkflowName -eq $workflow_name } ).SourceAppID
+
+$JobID = $(reportrunningjobs | where { $_.HostName -eq $srchost -And $_.AppName -eq $appname -And $_.JobClass -eq &apos;mount(AppAware)&apos; }).JobName
+$JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+$PrevJobPct = &quot;0&quot;
+if ($JobStatus -eq &apos;running&apos;) {
+  Write-Host &quot;Job is now running.... &quot;
+  while (&apos;running&apos; -eq $JobStatus) {
+    $JobPct = $(reportrunningjobs | where { $_.JobName -eq $JobID }).&quot;Progress%&quot;
+    if ($PrevJobPct -ne $JobPct) {
+      $PrevJobPct = $JobPct
+      sleep -Seconds 5
+      Write-Host &quot;- Progress% : $JobPct ...&quot;
+    } 
+    $JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+    } 
+} 
+
+sleep -Seconds 10
+
+$rc = $(reportworkflows -s | where-object { $_.ID -eq  $workflow_id })
+if ($rc.status -ne &apos;SUCCESS&apos;) { write-output &quot;Refresh job has failed - $rc.steps&quot; ; exit 1}
+
+$start = $(udsinfo lsjobhistory $JobID).startdate
+$duration = $(udsinfo lsjobhistory $JobID).duration
+$vsize = $(udsinfo lsjobhistory $JobID).&quot;Application size (GB)&quot;
+$tgthost = $(udsinfo lsjobhistory $JobID).targethost
+
+$usedGB = $(reportmountedimages | where { $_.SourceAppID -eq $appid -And $_.MountedAppName -eq $vdb } ).&quot;ConsumedSize(GB)&quot;
+
+
+ if (! $env:ACTSESSIONID ){
+   write-warning &quot;Login to CDS $Env:ActifioIP failed&quot;
+   break
+ }
+ else {
+   Disconnect-Act | Out-Null
+ } 
+
+write-output &quot;Refresh job using workflow $workflow_name has completed !!&quot;
+
+write-output &quot;Job started at $start , and took $duration to complete.&quot;
+write-output &quot;The size of $vdb on $tgthost is $vsize GB, actual storage consumed in GB is $usedGB &quot;</command>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

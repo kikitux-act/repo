@@ -1,0 +1,261 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>SourceHost</name>
+          <description>Source Oracle server</description>
+          <randomName>choice-parameter-1286106647054700</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>return [&quot;oracle&quot;, &quot;aixlpar&quot;, &quot;oracle-mask-prd&quot;, &quot;oracle-rac-n1&quot;]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>OnDemand-DB</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>SourceDB</name>
+          <description>Source Oracle Database</description>
+          <randomName>choice-parameter-1225920175571400</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>def dbApps = []
+def powerShellCommand = &apos;c:\\scripts\\list_dbappname.ps1 -srchapptype Oracle&apos; 
+
+def shellCommand = &quot;powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -Command \&quot;${powerShellCommand}\&quot;&quot;
+
+def process = shellCommand.execute()
+process.waitFor()
+def outputStream = new StringBuffer();
+process.waitForProcessOutput(outputStream, System.err)
+if(process.exitValue()){
+println process.err.text
+} else {
+println outputStream
+dbApps = outputStream.tokenize(&quot;|&quot;)
+}
+return dbApps</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>OnDemand-DB</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>TargetHost</name>
+          <description>Target Oracle server</description>
+          <randomName>choice-parameter-1226307588235300</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>return [&quot;oracle&quot;, &quot;aixlpar&quot;, &quot;oracle-mask-prd&quot;, &quot;oracle-rac-n1&quot;, &quot;oracle-rac-n2&quot;, &quot;demo-oracle-1&quot;, &quot;demo-oracle-2&quot;, &quot;demo-oracle-3&quot;, &quot;demo-oracle-4&quot;, &quot;demo-oracle-5&quot;, &quot;demo-oracle-6&quot;, &quot;demo-oracle-7&quot;, &quot;demo-oracle-8&quot;, &quot;demo-oracle-9&quot;, &quot;demo-oracle-10&quot;, &quot;demo-oracle-11&quot;] </script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>OnDemand-DB</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>ORACLE_SID</name>
+          <description>ORACLE_SID for the new Oracle database</description>
+          <defaultValue>?</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>SGAsizeMB</name>
+          <description></description>
+          <randomName>choice-parameter-1226307590000600</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>return [&quot;700&quot;,&quot;800&quot;,&quot;900&quot;,&quot;1000&quot;]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>OnDemand-DB</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>SGApct</name>
+          <description></description>
+          <randomName>choice-parameter-1286394535376800</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>return [&quot;75&quot;,&quot;80&quot;,&quot;85&quot;]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>OnDemand-DB</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>ORACLE_HOME</name>
+          <description>Value of the ORACLE_HOME directory</description>
+          <defaultValue>/home/oracle/app/oracle/product/11.2.0/dbhome_1</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>TNSADMIN_DIR</name>
+          <description>Value of the TNS_ADMIN directory</description>
+          <defaultValue>/home/oracle/app/oracle/product/11.2.0/dbhome_1/network/admin</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>Label</name>
+          <description>Label of the Oracle mount</description>
+          <defaultValue></defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ActifioIP</name>
+          <description>Actifio IP address</description>
+          <defaultValue>172.24.1.180</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ActUser</name>
+          <description>Actifio service account for the Jenkins job</description>
+          <defaultValue>jenkin01</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.PasswordParameterDefinition>
+          <name>ActPassword</name>
+          <description>Password for the Actifio service account</description>
+          <defaultValue>{AQAAABAAAAAQsA+yuGEMlSPUvmB2w8KrKPfZqXyu3Lcl0M30B+DCtRM=}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>Message</name>
+          <description></description>
+          <randomName>choice-parameter-1611010225631200</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>line1=&apos;To provision/clone &lt;b&gt;&apos; + ORACLE_SID + &apos;&lt;/b&gt; database using &lt;b&gt;&apos; + SourceDB + &apos;&lt;/b&gt; on &apos; + TargetHost + &apos;,&apos;
+line2=&apos;click on the &lt;mark&gt; Build &lt;/mark&gt; button&apos;
+return &quot;&lt;p style=&apos;background-color:Olive;color:GhostWhite&apos;&gt;${line1}&lt;/br&gt;${line2}&lt;/br&gt;&lt;/p&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>OnDemand-DB</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>ORACLE_SID, SourceDB, TargetHost</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@1.3">
+      <command>$pwfile = &quot;c:\scripts\jenkin01.key&quot;
+$env:IGNOREACTCERTS = $true
+ 
+$env:ActPassword| ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-File $pwfile
+ 
+if (! $env:ACTSESSIONID ){
+  Connect-Act -acthost $Env:ActifioIP -actuser $Env:ActUser -passwordfile $pwfile -ignorecerts -quiet
+}
+
+$source_host = $env:SourceHost -replace &quot;`n&quot;, &quot;&quot; 
+$target_host = $env:TargetHost -replace &quot;`n&quot;, &quot;&quot; 
+$source_db = $env:SourceDB -replace &quot;`n&quot;, &quot;&quot;
+$appid = $(reportapps | where-object { $_.HostName -eq $source_host -and $_.AppName -eq $source_db }).AppID 
+
+write-output &quot;Kicking off an on-demand provision of virtual database $env:ORACLE_SID on $env:TargetHost using images from $source_db database `n&quot;
+
+udstask mountimage -appid $appid -host $env:TargetHost -label $env:ORACLE_SID -appaware -restoreoption &quot;provisioningoptions=&lt;provisioningoptions&gt;&lt;databasesid&gt;$env:ORACLE_SID&lt;/databasesid&gt;&lt;orahome&gt;$env:ORACLE_HOME&lt;/orahome&gt;&lt;tnsadmindir&gt;$env:TNSADMIN_DIR&lt;/tnsadmindir&gt;&lt;totalmemory&gt;$env:SGAsizeMB&lt;/totalmemory&gt;&lt;sgapct&gt;$env:SGApct&lt;/sgapct&gt;&lt;username&gt;oracle&lt;/username&gt;&lt;/provisioningoptions&gt;,reprotect=false&quot; -nowait | out-null
+
+sleep -Seconds 30
+
+$JobID = $(reportrunningjobs | where { $_.HostName -eq $source_host -And $_.AppName -eq $source_db -And $_.Target -eq $target_host -And $_.JobClass -eq &apos;mount(AppAware)&apos; }).JobName
+$JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+$PrevJobPct = &quot;0&quot;
+if ($JobStatus -eq &apos;running&apos;) {
+  Write-Host &quot;Job is now running.... &quot;
+  while (&apos;running&apos; -eq $JobStatus) {
+    $JobPct = $(reportrunningjobs | where { $_.JobName -eq $JobID }).&quot;Progress%&quot;
+    if ($PrevJobPct -ne $JobPct) {
+      $PrevJobPct = $JobPct
+      sleep -Seconds 5
+      Write-Host &quot;- Progress% : $JobPct ...&quot;
+    } 
+    $JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+    } 
+} 
+sleep -Seconds 20
+
+$start = $(udsinfo lsjobhistory $JobID).startdate
+$duration = $(udsinfo lsjobhistory $JobID).duration
+$vsize = $(udsinfo lsjobhistory $JobID).&quot;Application size (GB)&quot;
+$tgthost = $(udsinfo lsjobhistory $JobID).targethost
+$usedGB = $(reportmountedimages | where { $_.SourceAppID -eq $appid -And $_.MountedAppName -eq $env:ORACLE_SID } ).&quot;ConsumedSize(GB)&quot;
+
+
+ if (! $env:ACTSESSIONID ){
+   write-warning &quot;Login to CDS $Env:ActifioIP failed&quot;
+   break
+ }
+ else {
+   Disconnect-Act | Out-Null
+ } 
+
+write-output &quot;$env:ORACLE_SID database is successfully provisioned on $env:TargetHost !!&quot;
+
+write-output &quot;Job started at $start , and took $duration to complete.&quot;
+write-output &quot;The size of $env:ORACLE_SID on $tgthost is $vsize GB, actual storage consumed in GB is $usedGB &quot;
+</command>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

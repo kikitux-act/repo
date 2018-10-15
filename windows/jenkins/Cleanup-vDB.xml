@@ -1,0 +1,261 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>SourceHost</name>
+          <description>Name of the Oracle server</description>
+          <randomName>choice-parameter-1381444743247300</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>return [&quot;oracle&quot;, &quot;aixlpar&quot;, &quot;oracle-mask-prd&quot;, &quot;oracle-rac-n1&quot;]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Cleanup-vDB</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>DBtype</name>
+          <description>Database type</description>
+          <randomName>choice-parameter-1381494456822200</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>return[&quot;Oracle&quot;]</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Cleanup-vDB</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.ChoiceParameter plugin="uno-choice@2.1">
+          <name>SourceDB</name>
+          <description>Source Oracle database</description>
+          <randomName>choice-parameter-1381444752020000</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>def dbApps = []
+def powerShellCommand = &apos;c:\\scripts\\list_dbappname.ps1 -srchapptype Oracle&apos; 
+
+def shellCommand = &quot;powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -Command \&quot;${powerShellCommand}\&quot;&quot;
+
+def process = shellCommand.execute()
+process.waitFor()
+def outputStream = new StringBuffer();
+process.waitForProcessOutput(outputStream, System.err)
+if(process.exitValue()){
+println process.err.text
+} else {
+println outputStream
+dbApps = outputStream.tokenize(&quot;|&quot;)
+}
+return dbApps</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Cleanup-vDB</projectName>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.ChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.1">
+          <name>TargetHost</name>
+          <description>Mounted Host</description>
+          <randomName>choice-parameter-1393681741414800</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>def TgtHosts = []
+def powerShellCommand = &apos;c:\\scripts\\list_mnttgthost.ps1 -srchappdb &apos; + SourceDB +  &apos; -srchapphost  &apos;  + SourceHost
+
+def shellCommand = &quot;powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -Command \&quot;${powerShellCommand}\&quot;&quot;
+
+def process = shellCommand.execute()
+process.waitFor()
+def outputStream = new StringBuffer();
+process.waitForProcessOutput(outputStream, System.err)
+if(process.exitValue()){
+println process.err.text
+} else {
+println outputStream
+TgtHosts = outputStream.tokenize(&quot;|&quot;)
+}
+return TgtHosts</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Cleanup-vDB</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>SourceDB, SourceHost</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <org.biouno.unochoice.CascadeChoiceParameter plugin="uno-choice@2.1">
+          <name>TargetDB</name>
+          <description>Name of the mounted virtual DB</description>
+          <randomName>choice-parameter-1394712779437000</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>def TgtDBs = []
+def powerShellCommand = &apos;c:\\scripts\\list_mnttgtapp.ps1 -srchappdb &apos; + SourceDB +  &apos; -srchapphost  &apos;  + SourceHost + &apos; -tgtapphost &apos; + TargetHost
+
+def shellCommand = &quot;powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -Command \&quot;${powerShellCommand}\&quot;&quot;
+
+def process = shellCommand.execute()
+process.waitFor()
+def outputStream = new StringBuffer();
+process.waitForProcessOutput(outputStream, System.err)
+if(process.exitValue()){
+println process.err.text
+} else {
+println outputStream
+TgtDBs = outputStream.tokenize(&quot;|&quot;)
+}
+return TgtDBs</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Cleanup-vDB</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>SourceDB, SourceHost, TargetHost</referencedParameters>
+          <choiceType>PT_SINGLE_SELECT</choiceType>
+          <filterable>false</filterable>
+          <filterLength>1</filterLength>
+        </org.biouno.unochoice.CascadeChoiceParameter>
+        <hudson.model.StringParameterDefinition>
+          <name>ActifioIP</name>
+          <description>Actifio IP address</description>
+          <defaultValue>172.24.1.180</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>ActUser</name>
+          <description>Actifio User</description>
+          <defaultValue>jenkin01</defaultValue>
+          <trim>false</trim>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.PasswordParameterDefinition>
+          <name>ActPassword</name>
+          <description>Actifio Password</description>
+          <defaultValue>{AQAAABAAAAAQIpRFVqeufizw7PNMXfUZjpia+M9A3QId1OlXRnGcnhw=}</defaultValue>
+        </hudson.model.PasswordParameterDefinition>
+        <org.biouno.unochoice.DynamicReferenceParameter plugin="uno-choice@2.1">
+          <name>Message</name>
+          <description></description>
+          <randomName>choice-parameter-1609732474189400</randomName>
+          <visibleItemCount>1</visibleItemCount>
+          <script class="org.biouno.unochoice.model.GroovyScript">
+            <secureScript plugin="script-security@1.46">
+              <script>line1=&apos;To unmount &lt;b&gt;&apos; + TargetDB + &apos;&lt;/b&gt; &apos; + DBtype + &apos; database from &lt;b&gt;&apos; + TargetHost + &apos;&lt;/b&gt;,&apos;
+line2=&apos;click on the &lt;mark&gt; Build &lt;/mark&gt; button&apos;
+return &quot;&lt;p style=&apos;background-color:Olive;color:GhostWhite&apos;&gt;${line1}&lt;/br&gt;${line2}&lt;/br&gt;&lt;/p&gt;&quot;</script>
+              <sandbox>false</sandbox>
+            </secureScript>
+            <secureFallbackScript plugin="script-security@1.46">
+              <script></script>
+              <sandbox>false</sandbox>
+            </secureFallbackScript>
+          </script>
+          <projectName>Cleanup-vDB</projectName>
+          <parameters class="linked-hash-map"/>
+          <referencedParameters>TargetDB, DBtype, TargetHost</referencedParameters>
+          <choiceType>ET_FORMATTED_HTML</choiceType>
+          <omitValueField>false</omitValueField>
+        </org.biouno.unochoice.DynamicReferenceParameter>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.powershell.PowerShell plugin="powershell@1.3">
+      <command>$pwfile = &quot;c:\scripts\jenkin01.key&quot;
+$env:IGNOREACTCERTS = $true
+ 
+$env:ActPassword| ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-File $pwfile
+ 
+if (! $env:ACTSESSIONID ){
+  Connect-Act -acthost $Env:ActifioIP -actuser $Env:ActUser -passwordfile $pwfile -ignorecerts -quiet
+}
+
+$src_host = $env:SourceHost -replace &quot;`n&quot;, &quot;&quot; 
+$src_db = $env:SourceDB -replace &quot;`n&quot;, &quot;&quot; 
+$tgt_host = $env:TargetHost -replace &quot;`n&quot;, &quot;&quot; 
+$mnt_db = $env:TargetDB -replace &quot;`n&quot;, &quot;&quot; 
+
+
+$cmd = $(reportmountedimages | where-object { $_.SourceHost -eq $src_host -And $_.SourceApp -eq $src_db -And $_.MountedHost -eq $tgt_host -And $_.MountedAppName -eq $mnt_db }).UnmountDeleteCommand
+
+write-output &quot;Unmounting the $mnt_db DB on $tgt_host `n&quot;
+Invoke-Expression $cmd | out-null
+
+sleep -Seconds 15
+
+$JobID = $(reportrunningjobs | where { $_.HostName -eq $src_host -And $_.AppName -eq $src_db -And $_.Target -eq $tgt_host }).JobName
+$JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+$PrevJobPct = &quot;0&quot;
+if ($JobStatus -eq &apos;running&apos;) {
+  Write-Host &quot;Job is now running.... &quot;
+  while (&apos;running&apos; -eq $JobStatus) {
+    $JobPct = $(reportrunningjobs | where { $_.JobName -eq $JobID }).&quot;Progress%&quot;
+    if ($PrevJobPct -ne $JobPct) {
+      $PrevJobPct = $JobPct
+      sleep -Seconds 5
+      Write-Host &quot;- Progress% : $JobPct ...&quot;
+    } 
+    $JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+    } 
+} 
+
+write-output &apos;Job completed successfully !!&apos;
+
+if (! $env:ACTSESSIONID ){
+   write-warning &quot;Login to CDS $Env:ActifioIP failed&quot;
+   break
+ }
+ else {
+   Disconnect-Act | Out-Null
+ } </command>
+    </hudson.plugins.powershell.PowerShell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
