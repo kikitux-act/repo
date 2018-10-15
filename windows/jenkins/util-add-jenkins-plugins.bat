@@ -26,6 +26,7 @@ echo Installing plugin
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 install-plugin powershell --username %uid% --password %pwd% 
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 install-plugin slack --username %uid% --password %pwd% 
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 install-plugin ssh-slaves --username %uid% --password %pwd% 
+%java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 install-plugin uno-choice --username %uid% --password %pwd% 
 
 
 echo Restarting Jenkins
