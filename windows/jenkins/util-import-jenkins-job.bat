@@ -20,6 +20,14 @@ echo Import jobs
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 create-job "Refresh-Workflow-DB" --username %uid% --password %pwd% < Refresh-Workflow-DB.xml
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 create-job "Cleanup-DB" --username %uid% --password %pwd% < Cleanup-DB.xml
 
+echo .
+echo Copying supporting scripts to c:\scripts
+if not exist "c:\scripts" md "c:\scripts"
+copy .\list_dbappname.ps1 c:\scripts
+copy .\list_workflows.ps1 c:\scripts
+copy .\list_mnttgthost.ps1 c:\scripts
+copy .\list_mnttgtapp.ps1 c:\scripts
+copy .\list_dbtype.ps1 c:\scripts
 
 echo Restarting Jenkins
 %java_exe% -jar %java_jar% -s http://%jenkins_ip%:8080 restart --username %uid% --password %pwd% 
