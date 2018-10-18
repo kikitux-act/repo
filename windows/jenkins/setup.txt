@@ -1,0 +1,309 @@
+Last Updated: 15-Oct-2018
+
+```
+Install plug-ins:
+Active Choices Parameter
+Active Choices Reactive Parameter
+String Parameter
+Password Parameter
+Active Choices Reactive Reference Parameter
+
+
+Active Choices Plug-in
+Active Directory plugin
+Email Extension
+Extended Choice Parameter Plug-in
+Extensible Choice Parameter Plug-in
+Folders Plugin
+Green Balls
+Hidden Parameter plugin
+PowerShell plugin
+Slack Notification plugin
+SSH Slaves
+
+```
+
+----------------------------------------------------------------------------------------------------------------------------
+
+```
+## File: Refresh-Workflow-vDB
+#
+$pwfile = "c:\scripts\jenkin01.key"
+$env:IGNOREACTCERTS = $true
+ 
+$env:ActPassword| ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-File $pwfile
+ 
+if (! $env:ACTSESSIONID ){
+  Connect-Act -acthost $Env:ActifioIP -actuser $Env:ActUser -passwordfile $pwfile -ignorecerts -quiet
+}
+
+$workflow_name = $Env:WorkflowList -replace "`n", ""
+$workflow_id = $(udsinfo lsworkflow | where-object {$_.name -eq $workflow_name}).id
+write-output "Kicking off workflow $workflow_name ( ID: $workflow_id ) `n"
+
+$rc = $(udstask chworkflow -disable false $workflow_id)    
+if ($rc.result -ne $workflow_id) { write-output "There is a problem disabling the workflow $workflow_name - $rc.errormessage" ; exit 1 }
+
+udstask runworkflow $workflow_id | out-null   
+$rc = $(reportworkflows -s | where-object { $_.ID -eq  $workflow_id })
+if ($rc.status -ne "RUNNING") { write-output "Unable to trigger workflow - $($rc.steps)" ; exit 1}
+
+$rc = $(udstask chworkflow -disable true $workflow_id)    
+if ($rc.result -ne $workflow_id) { write-output "There is a problem enabling with workflow $workflow_name - $rc.errormessage" ; exit 1 }
+
+sleep -Seconds 45
+$srchost = $(reportworkflows | where {$_.WorkflowName -eq $workflow_name } ).SourceHostName
+$appname = $(reportworkflows | where {$_.WorkflowName -eq $workflow_name } ).SourceAppName
+$vdb = $(reportworkflows | where {$_.WorkflowName -eq $workflow_name } ).TargetApp
+$appid = $(reportworkflows | where {$_.WorkflowName -eq $workflow_name } ).SourceAppID
+
+$JobID = $(reportrunningjobs | where { $_.HostName -eq $srchost -And $_.AppName -eq $appname }).JobName
+$JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+$PrevJobPct = "0"
+if ($JobStatus -eq 'running') {
+  Write-Host "Job is now running.... "
+  while ('running' -eq $JobStatus) {
+    $JobPct = $(reportrunningjobs | where { $_.JobName -eq $JobID })."Progress%"
+    if ($PrevJobPct -ne $JobPct) {
+      $PrevJobPct = $JobPct
+      sleep -Seconds 5
+      Write-Host "- Progress% : $JobPct ..."
+    } 
+    $JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+    } 
+} 
+
+sleep -Seconds 10
+
+$rc = $(reportworkflows -s | where-object { $_.ID -eq  $workflow_id })
+if ($rc.status -ne "SUCCESS") { write-output "Refresh job has failed - $rc.steps" ; exit 1}
+
+$start = $(udsinfo lsjobhistory $JobID).startdate
+$duration = $(udsinfo lsjobhistory $JobID).duration
+$vsize = $(udsinfo lsjobhistory $JobID)."Application size (GB)"
+$tgthost = $(udsinfo lsjobhistory $JobID).targethost
+
+$usedGB = $(reportmountedimages | where { $_.SourceAppID -eq $appid -And $_.MountedAppName -eq $vdb } )."ConsumedSize(GB)"
+
+
+ if (! $env:ACTSESSIONID ){
+   write-warning "Login to CDS $Env:ActifioIP failed"
+   break
+ }
+ else {
+   Disconnect-Act | Out-Null
+ } 
+
+write-output "Refresh job using workflow $workflow_name has completed !!"
+
+write-output "Job started at $start , and took $duration to complete."
+write-output "The size of $vdb on $tgthost is $vsize GB, actual storage consumed in GB is $usedGB "
+
+```
+----------------------------------------------------------------------------------------------------------------------------
+
+```
+## File: Cleanup-vDB
+#
+
+$pwfile = "c:\scripts\jenkin01.key"
+$env:IGNOREACTCERTS = $true
+ 
+$env:ActPassword| ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-File $pwfile
+ 
+if (! $env:ACTSESSIONID ){
+  Connect-Act -acthost $Env:ActifioIP -actuser $Env:ActUser -passwordfile $pwfile -ignorecerts -quiet
+}
+
+$src_host = $env:SourceHost -replace "`n", "" 
+$src_db = $env:SourceDB -replace "`n", "" 
+$tgt_host = $env:TargetHost -replace "`n", "" 
+$mnt_db = $env:TargetDB -replace "`n", "" 
+
+
+$cmd = $(reportmountedimages | where-object { $_.SourceHost -eq $src_host -And $_.SourceApp -eq $src_db -And $_.MountedHost -eq $tgt_host -And $_.MountedAppName -eq $mnt_db }).UnmountDeleteCommand
+
+write-output "Unmounting the $mnt_db DB on $tgt_host `n"
+Invoke-Expression $cmd | out-null
+
+sleep -Seconds 15
+
+$JobID = $(reportrunningjobs | where { $_.HostName -eq $src_host -And $_.AppName -eq $src_db -And $_.Target -eq $tgt_host }).JobName
+$JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+$PrevJobPct = "0"
+if ($JobStatus -eq 'running') {
+  Write-Host "Job is now running.... "
+  while ('running' -eq $JobStatus) {
+    $JobPct = $(reportrunningjobs | where { $_.JobName -eq $JobID })."Progress%"
+    if ($PrevJobPct -ne $JobPct) {
+      $PrevJobPct = $JobPct
+      sleep -Seconds 5
+      Write-Host "- Progress% : $JobPct ..."
+    } 
+    $JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+    } 
+} 
+
+write-output 'Job completed successfully !!'
+
+if (! $env:ACTSESSIONID ){
+   write-warning "Login to CDS $Env:ActifioIP failed"
+   break
+ }
+ else {
+   Disconnect-Act | Out-Null
+ } 
+```
+
+----------------------------------------------------------------------------------------------------------------------------
+
+```
+## File: OnDemand-Provision-vDB
+#
+
+$pwfile = "c:\scripts\jenkin01.key"
+$env:IGNOREACTCERTS = $true
+ 
+$env:ActPassword| ConvertTo-SecureString -AsPlainText -Force | ConvertFrom-SecureString | Out-File $pwfile
+ 
+if (! $env:ACTSESSIONID ){
+  Connect-Act -acthost $Env:ActifioIP -actuser $Env:ActUser -passwordfile $pwfile -ignorecerts -quiet
+}
+
+$source_host = $env:SourceHost -replace "`n", "" 
+$source_db = $env:SourceDB -replace "`n", ""
+$appid = $(reportapps | where-object { $_.HostName -eq $source_host -and $_.AppName -eq $source_db }).AppID 
+
+write-output "Kicking off an on-demand provision of virtual database $env:ORACLE_SID on $env:TargetHost using images from $source_db database `n"
+
+udstask mountimage -appid $appid -host $env:TargetHost -label $env:Label -appaware -restoreoption "provisioningoptions=<provisioningoptions><databasesid>$env:ORACLE_SID</databasesid><orahome>$env:ORACLE_HOME</orahome><tnsadmindir>$env:TNSADMIN_DIR</tnsadmindir><totalmemory>$env:SGAsizeMB</totalmemory><sgapct>$env:SGApct</sgapct><username>oracle</username></provisioningoptions>,reprotect=false" -nowait | out-null
+
+sleep -Seconds 30
+
+$JobID = $(reportrunningjobs | where { $_.HostName -eq $source_host -And $_.AppName -eq $source_db }).JobName
+$JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+$PrevJobPct = "0"
+if ($JobStatus -eq 'running') {
+  Write-Host "Job is now running.... "
+  while ('running' -eq $JobStatus) {
+    $JobPct = $(reportrunningjobs | where { $_.JobName -eq $JobID })."Progress%"
+    if ($PrevJobPct -ne $JobPct) {
+      $PrevJobPct = $JobPct
+      sleep -Seconds 5
+      Write-Host "- Progress% : $JobPct ..."
+    } 
+    $JobStatus = $(reportrunningjobs | where { $_.JobName -eq $JobID }).status
+    } 
+} 
+
+sleep -Seconds 20
+
+$start = $(udsinfo lsjobhistory $JobID).startdate
+$duration = $(udsinfo lsjobhistory $JobID).duration
+$vsize = $(udsinfo lsjobhistory $JobID)."Application size (GB)"
+$tgthost = $(udsinfo lsjobhistory $JobID).targethost
+$usedGB = $(reportmountedimages | where { $_.SourceAppID -eq $appid -And $_.MountedAppName -eq $env:ORACLE_SID } )."ConsumedSize(GB)"
+
+
+ if (! $env:ACTSESSIONID ){
+   write-warning "Login to CDS $Env:ActifioIP failed"
+   break
+ }
+ else {
+   Disconnect-Act | Out-Null
+ } 
+
+write-output "$env:ORACLE_SID database is successfully provisioned on $env:TargetHost !!"
+
+write-output "Job started at $start , and took $duration to complete."
+write-output "The size of $env:ORACLE_SID on $tgthost is $vsize GB, actual storage consumed in GB is $usedGB "
+```
+
+----------------------------------------------------------------------------------------------------------------------------
+
+
+```
+AGM-Basic-ActRestAPI:
+
+import javax.net.ssl.HttpsURLConnection;
+import java.lang.StringBuffer;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+// import groovy.json.JsonBuilder
+// import groovy.json.JsonOutput
+import groovy.json.*
+
+String urlBasePath = "https://melagm/actifio/session";
+String url2BasePath = "https://melagm/actifio/application";
+
+String username = "admin";
+String password = "password";
+
+URL url = new URL(urlBasePath);
+HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+
+String authStr = Base64.getEncoder().encodeToString("admin:password".getBytes());
+//setting Authorization header
+urlConnection.setRequestProperty("Authorization", "Basic " + authStr);
+
+int timeoutSeconds = 10;
+urlConnection.setConnectTimeout(timeoutSeconds * 1000);
+urlConnection.setDoOutput(true);
+urlConnection.setUseCaches(false);
+urlConnection.setRequestMethod("POST");
+urlConnection.connect();
+
+BufferedReader in2 = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+String inputLine;
+StringBuffer response = new StringBuffer();
+while ((inputLine = in2.readLine()) != null) {
+ response.append(inputLine);
+}
+in2.close();
+
+def slurper = new JsonSlurper()
+def result = slurper.parseText(response.toString())
+
+URL url2 = new URL(url2BasePath);
+HttpsURLConnection url2Connection = (HttpsURLConnection) url2.openConnection();
+
+//setting Authorization header
+url2Connection.setRequestProperty("Authorization", "Actifio " + result.session_id);
+url2Connection.setRequestProperty("Content-Type", "application/json")
+
+url2Connection.setDoOutput(true)
+url2Connection.setUseCaches(false)
+url2Connection.setRequestMethod("GET")
+
+url2Connection.connect();
+
+BufferedReader in3 = new BufferedReader(new InputStreamReader(url2Connection.getInputStream()));
+String input3Line;
+StringBuffer response3 = new StringBuffer();
+while ((input3Line = in3.readLine()) != null) {
+ response3.append(input3Line);
+}
+in3.close();
+
+def slurper3 = new JsonSlurper()
+def result3 = slurper.parseText(response3.toString())
+
+def list=[]
+def first = true
+for (item in result3.items) {
+  if (first) {
+    first = false
+	list = item.appname
+  } else {
+    list = list + ',' + item.appname
+  }
+}
+
+urlConnection.disconnect();
+url2Connection.disconnect();
+return list
+```
+
+----------------------------------------------------------------------------------------------------------------------------
